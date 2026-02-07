@@ -491,78 +491,31 @@
             }, parseFloat(heart.style.animationDuration) * 1000);
         }
 
-        // Move No button to random position
-        let lastMoveTime = 0;
-        const moveDebounce = 150; // Minimum time between moves in ms
-
-        function moveNoButton() {
-            const now = Date.now();
-            if (now - lastMoveTime < moveDebounce) return;
-            lastMoveTime = now;
-
-            const padding = 20;
-            const btnWidth = noBtn.offsetWidth;
-            const btnHeight = noBtn.offsetHeight;
+        // Handle No button click - shrink No, grow Yes
+        let clickCount = 0;
+        
+        function handleNoClick(e) {
+            e.preventDefault();
+            clickCount++;
             
-            // Get the actual visible viewport dimensions using visualViewport for mobile accuracy
-            const vv = window.visualViewport;
-            const viewportWidth = vv ? vv.width : window.innerWidth;
-            const viewportHeight = vv ? vv.height : window.innerHeight;
-            const offsetLeft = vv ? vv.offsetLeft : 0;
-            const offsetTop = vv ? vv.offsetTop : 0;
+            // Shrink the No button
+            const shrinkFactor = Math.max(0.3, 1 - (clickCount * 0.15)); // Shrink by 15% each click, min 30%
+            noBtn.style.transform = `scale(${shrinkFactor})`;
             
-            // Calculate safe positions with generous padding for mobile
-            const minX = offsetLeft + padding;
-            const minY = offsetTop + padding + 50; // Extra top padding to avoid header
-            const maxX = offsetLeft + viewportWidth - btnWidth - padding;
-            const maxY = offsetTop + viewportHeight - btnHeight - padding - 30; // Extra bottom margin
-
-            // Get Yes button position to avoid overlap
-            const yesBtnRect = yesBtn.getBoundingClientRect();
+            // If too small, hide it completely
+            if (shrinkFactor <= 0.3) {
+                noBtn.style.opacity = '0.3';
+                noBtn.style.pointerEvents = 'none';
+            }
             
-            let newX, newY;
-            let attempts = 0;
-            const maxAttempts = 50;
-            
-            // On smaller screens, reduce the distance requirement
-            const minDistance = viewportWidth < 500 ? 50 : 100;
-            const avoidBuffer = viewportWidth < 500 ? 40 : 80;
-
-            // Calculate new position ensuring it stays within bounds
-            do {
-                newX = minX + Math.floor(Math.random() * Math.max(1, maxX - minX));
-                newY = minY + Math.floor(Math.random() * Math.max(1, maxY - minY));
-                attempts++;
-                
-                // Check if too close to Yes button
-                const tooCloseToYes = (
-                    newX < yesBtnRect.right + avoidBuffer &&
-                    newX + btnWidth > yesBtnRect.left - avoidBuffer &&
-                    newY < yesBtnRect.bottom + avoidBuffer &&
-                    newY + btnHeight > yesBtnRect.top - avoidBuffer
-                );
-                
-                if (!tooCloseToYes) break;
-            } while (attempts < maxAttempts);
-
-            // Final safety clamp to ensure button is always visible
-            newX = Math.max(minX, Math.min(newX, maxX));
-            newY = Math.max(minY, Math.min(newY, maxY));
-
-            noBtn.style.left = newX + 'px';
-            noBtn.style.top = newY + 'px';
-
-            // Increase Yes button size (smaller increments on mobile)
-            noMoveCount++;
-            const growthRate = viewportWidth < 500 ? 0.08 : 0.12;
-            yesBtnScale = 1 + (noMoveCount * growthRate);
-            
+            // Grow the Yes button
+            const growFactor = 1 + (clickCount * 0.2); // Grow by 20% each click
             const baseFontSize = 1.2;
             const basePaddingV = 16;
             const basePaddingH = 50;
-
-            yesBtn.style.fontSize = (baseFontSize * yesBtnScale) + 'rem';
-            yesBtn.style.padding = `${basePaddingV * yesBtnScale}px ${basePaddingH * yesBtnScale}px`;
+            
+            yesBtn.style.fontSize = `${baseFontSize * growFactor}rem`;
+            yesBtn.style.padding = `${basePaddingV * growFactor}px ${basePaddingH * growFactor}px`;
         }
 
         // Yes button click handler
