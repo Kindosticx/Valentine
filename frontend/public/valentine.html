@@ -495,7 +495,7 @@
 
         // Move No button to random position
         let lastMoveTime = 0;
-        const moveDebounce = 200; // Minimum time between moves in ms
+        const moveDebounce = 150; // Minimum time between moves in ms
 
         function moveNoButton() {
             const now = Date.now();
@@ -518,7 +518,7 @@
             let attempts = 0;
             const maxAttempts = 50;
 
-            // Ensure we move at least 100px from current position
+            // Ensure we move at least 150px from current position
             do {
                 newX = padding + Math.random() * (maxX - padding);
                 newY = padding + Math.random() * (maxY - padding);
@@ -537,7 +537,7 @@
                     newY + btnHeight > yesBtnRect.top - 60
                 );
                 
-                if (!tooCloseToYes && distanceFromCurrent > 100) break;
+                if (!tooCloseToYes && distanceFromCurrent > 150) break;
             } while (attempts < maxAttempts);
 
             noBtn.style.left = newX + 'px';
