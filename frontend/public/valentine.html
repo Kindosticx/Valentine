@@ -506,9 +506,9 @@
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
             
-            // Use documentElement for accurate viewport size
-            const viewportWidth = Math.min(window.innerWidth, document.documentElement.clientWidth);
-            const viewportHeight = Math.min(window.innerHeight, document.documentElement.clientHeight);
+            // Use visualViewport if available for more accurate dimensions
+            const viewportWidth = window.visualViewport ? window.visualViewport.width : document.documentElement.clientWidth;
+            const viewportHeight = window.visualViewport ? window.visualViewport.height : document.documentElement.clientHeight;
             
             // Ensure button stays fully within viewport
             const maxX = viewportWidth - btnWidth - padding;
@@ -546,7 +546,7 @@
                 if (!tooCloseToYes && distanceFromCurrent > 150) break;
             } while (attempts < maxAttempts);
 
-            // Final bounds check
+            // Final bounds check using reliable values
             newX = Math.max(padding, Math.min(newX, maxX));
             newY = Math.max(padding, Math.min(newY, maxY));
 
