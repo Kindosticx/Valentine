@@ -502,62 +502,62 @@
             if (now - lastMoveTime < moveDebounce) return;
             lastMoveTime = now;
 
-            const padding = 50;
+            const padding = 20;
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
             
-            // Get the actual visible viewport dimensions
-            const viewportWidth = document.documentElement.clientWidth;
-            const viewportHeight = window.innerHeight;
+            // Get the actual visible viewport dimensions using visualViewport for mobile accuracy
+            const vv = window.visualViewport;
+            const viewportWidth = vv ? vv.width : window.innerWidth;
+            const viewportHeight = vv ? vv.height : window.innerHeight;
+            const offsetLeft = vv ? vv.offsetLeft : 0;
+            const offsetTop = vv ? vv.offsetTop : 0;
             
-            // Calculate safe max positions
-            const maxX = Math.floor(viewportWidth - btnWidth - padding);
-            const maxY = Math.floor(viewportHeight - btnHeight - padding);
-            const minX = padding;
-            const minY = padding;
+            // Calculate safe positions with generous padding
+            const minX = offsetLeft + padding;
+            const minY = offsetTop + padding;
+            const maxX = offsetLeft + viewportWidth - btnWidth - padding;
+            const maxY = offsetTop + viewportHeight - btnHeight - padding;
 
-            // Get current No button position
-            const currentRect = noBtn.getBoundingClientRect();
-            
             // Get Yes button position to avoid overlap
             const yesBtnRect = yesBtn.getBoundingClientRect();
             
             let newX, newY;
             let attempts = 0;
-            const maxAttempts = 100;
+            const maxAttempts = 50;
+            
+            // On smaller screens, reduce the distance requirement
+            const minDistance = viewportWidth < 500 ? 50 : 100;
+            const avoidBuffer = viewportWidth < 500 ? 40 : 80;
 
             // Calculate new position ensuring it stays within bounds
             do {
-                newX = minX + Math.floor(Math.random() * (maxX - minX));
-                newY = minY + Math.floor(Math.random() * (maxY - minY));
+                newX = minX + Math.floor(Math.random() * Math.max(1, maxX - minX));
+                newY = minY + Math.floor(Math.random() * Math.max(1, maxY - minY));
                 attempts++;
                 
-                const distanceFromCurrent = Math.sqrt(
-                    Math.pow(newX - currentRect.left, 2) + 
-                    Math.pow(newY - currentRect.top, 2)
-                );
-                
-                // Check if too close to Yes button OR not far enough from current position
+                // Check if too close to Yes button
                 const tooCloseToYes = (
-                    newX < yesBtnRect.right + 80 &&
-                    newX + btnWidth > yesBtnRect.left - 80 &&
-                    newY < yesBtnRect.bottom + 80 &&
-                    newY + btnHeight > yesBtnRect.top - 80
+                    newX < yesBtnRect.right + avoidBuffer &&
+                    newX + btnWidth > yesBtnRect.left - avoidBuffer &&
+                    newY < yesBtnRect.bottom + avoidBuffer &&
+                    newY + btnHeight > yesBtnRect.top - avoidBuffer
                 );
                 
-                if (!tooCloseToYes && distanceFromCurrent > 100) break;
+                if (!tooCloseToYes) break;
             } while (attempts < maxAttempts);
 
-            // Hard clamp to ensure within bounds
-            newX = Math.min(Math.max(newX, minX), maxX);
-            newY = Math.min(Math.max(newY, minY), maxY);
+            // Final safety clamp to ensure button is always visible
+            newX = Math.max(minX, Math.min(newX, maxX));
+            newY = Math.max(minY, Math.min(newY, maxY));
 
             noBtn.style.left = newX + 'px';
             noBtn.style.top = newY + 'px';
 
-            // Increase Yes button size
+            // Increase Yes button size (smaller increments on mobile)
             noMoveCount++;
-            yesBtnScale = 1 + (noMoveCount * 0.12);
+            const growthRate = viewportWidth < 500 ? 0.08 : 0.12;
+            yesBtnScale = 1 + (noMoveCount * growthRate);
             
             const baseFontSize = 1.2;
             const basePaddingV = 16;
