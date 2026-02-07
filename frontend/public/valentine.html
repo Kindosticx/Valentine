@@ -495,9 +495,13 @@
         }
 
         // Move No button to random position
+        let lastMoveTime = 0;
+        const moveDebounce = 200; // Minimum time between moves in ms
+
         function moveNoButton() {
-            if (isNoButtonMoving) return;
-            isNoButtonMoving = true;
+            const now = Date.now();
+            if (now - lastMoveTime < moveDebounce) return;
+            lastMoveTime = now;
 
             const padding = 20;
             const btnWidth = noBtn.offsetWidth;
@@ -505,6 +509,9 @@
             const maxX = window.innerWidth - btnWidth - padding;
             const maxY = window.innerHeight - btnHeight - padding;
 
+            // Get current No button position
+            const currentRect = noBtn.getBoundingClientRect();
+            
             // Get Yes button position to avoid overlap
             const yesBtnRect = yesBtn.getBoundingClientRect();
             
@@ -512,17 +519,27 @@
             let attempts = 0;
             const maxAttempts = 50;
 
+            // Ensure we move at least 100px from current position
             do {
                 newX = padding + Math.random() * (maxX - padding);
                 newY = padding + Math.random() * (maxY - padding);
                 attempts++;
-            } while (
-                attempts < maxAttempts &&
-                newX < yesBtnRect.right + 50 &&
-                newX + btnWidth > yesBtnRect.left - 50 &&
-                newY < yesBtnRect.bottom + 50 &&
-                newY + btnHeight > yesBtnRect.top - 50
-            );
+                
+                const distanceFromCurrent = Math.sqrt(
+                    Math.pow(newX - currentRect.left, 2) + 
+                    Math.pow(newY - currentRect.top, 2)
+                );
+                
+                // Check if too close to Yes button OR not far enough from current position
+                const tooCloseToYes = (
+                    newX < yesBtnRect.right + 60 &&
+                    newX + btnWidth > yesBtnRect.left - 60 &&
+                    newY < yesBtnRect.bottom + 60 &&
+                    newY + btnHeight > yesBtnRect.top - 60
+                );
+                
+                if (!tooCloseToYes && distanceFromCurrent > 100) break;
+            } while (attempts < maxAttempts);
 
             noBtn.style.left = newX + 'px';
             noBtn.style.top = newY + 'px';
@@ -537,10 +554,6 @@
 
             yesBtn.style.fontSize = (baseFontSize * yesBtnScale) + 'rem';
             yesBtn.style.padding = `${basePaddingV * yesBtnScale}px ${basePaddingH * yesBtnScale}px`;
-
-            setTimeout(() => {
-                isNoButtonMoving = false;
-            }, 150);
         }
 
         // Yes button click handler
