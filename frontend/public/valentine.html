@@ -502,11 +502,13 @@
             if (now - lastMoveTime < moveDebounce) return;
             lastMoveTime = now;
 
-            const padding = 20;
+            const padding = 30;
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
-            const maxX = window.innerWidth - btnWidth - padding;
-            const maxY = window.innerHeight - btnHeight - padding;
+            
+            // Ensure button stays fully within viewport
+            const maxX = Math.max(padding, window.innerWidth - btnWidth - padding);
+            const maxY = Math.max(padding, window.innerHeight - btnHeight - padding);
 
             // Get current No button position
             const currentRect = noBtn.getBoundingClientRect();
@@ -516,7 +518,7 @@
             
             let newX, newY;
             let attempts = 0;
-            const maxAttempts = 50;
+            const maxAttempts = 100;
 
             // Ensure we move at least 150px from current position
             do {
@@ -531,14 +533,18 @@
                 
                 // Check if too close to Yes button OR not far enough from current position
                 const tooCloseToYes = (
-                    newX < yesBtnRect.right + 60 &&
-                    newX + btnWidth > yesBtnRect.left - 60 &&
-                    newY < yesBtnRect.bottom + 60 &&
-                    newY + btnHeight > yesBtnRect.top - 60
+                    newX < yesBtnRect.right + 80 &&
+                    newX + btnWidth > yesBtnRect.left - 80 &&
+                    newY < yesBtnRect.bottom + 80 &&
+                    newY + btnHeight > yesBtnRect.top - 80
                 );
                 
                 if (!tooCloseToYes && distanceFromCurrent > 150) break;
             } while (attempts < maxAttempts);
+
+            // Double-check bounds before setting
+            newX = Math.max(padding, Math.min(newX, window.innerWidth - btnWidth - padding));
+            newY = Math.max(padding, Math.min(newY, window.innerHeight - btnHeight - padding));
 
             noBtn.style.left = newX + 'px';
             noBtn.style.top = newY + 'px';
