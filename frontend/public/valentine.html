@@ -668,12 +668,13 @@
             const viewportWidth = vv ? vv.width : window.innerWidth;
             const viewportHeight = vv ? vv.height : window.innerHeight;
             
-            // Center horizontally, position near bottom third of screen
+            // Center horizontally, position in lower area but not too low
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
+            const padding = 20;
             
             noBtn.style.left = ((viewportWidth - btnWidth) / 2) + 'px';
-            noBtn.style.top = (viewportHeight * 0.7) + 'px';
+            noBtn.style.top = Math.min(viewportHeight * 0.65, viewportHeight - btnHeight - padding) + 'px';
         }, 100);
     </script>
 </body>
