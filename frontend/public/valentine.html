@@ -513,11 +513,11 @@
             const offsetLeft = vv ? vv.offsetLeft : 0;
             const offsetTop = vv ? vv.offsetTop : 0;
             
-            // Calculate safe positions with generous padding
+            // Calculate safe positions with generous padding for mobile
             const minX = offsetLeft + padding;
-            const minY = offsetTop + padding;
+            const minY = offsetTop + padding + 50; // Extra top padding to avoid header
             const maxX = offsetLeft + viewportWidth - btnWidth - padding;
-            const maxY = offsetTop + viewportHeight - btnHeight - padding;
+            const maxY = offsetTop + viewportHeight - btnHeight - padding - 30; // Extra bottom margin
 
             // Get Yes button position to avoid overlap
             const yesBtnRect = yesBtn.getBoundingClientRect();
