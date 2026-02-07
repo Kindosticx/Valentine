@@ -612,8 +612,9 @@
         // Event Listeners
         yesBtn.addEventListener('click', handleYesClick);
 
-        // No button - both hover and touch
+        // No button - multiple triggers for better evasion
         noBtn.addEventListener('mouseenter', moveNoButton);
+        noBtn.addEventListener('mouseover', moveNoButton);
         noBtn.addEventListener('touchstart', function(e) {
             e.preventDefault();
             moveNoButton();
