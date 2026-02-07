@@ -636,27 +636,44 @@
             moveNoButton();
         });
 
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            const btnRect = noBtn.getBoundingClientRect();
+        // Handle window resize and orientation change
+        function keepButtonVisible() {
+            const vv = window.visualViewport;
+            const viewportWidth = vv ? vv.width : window.innerWidth;
+            const viewportHeight = vv ? vv.height : window.innerHeight;
             const padding = 20;
             
-            if (btnRect.right > window.innerWidth - padding) {
-                noBtn.style.left = (window.innerWidth - noBtn.offsetWidth - padding) + 'px';
+            const btnRect = noBtn.getBoundingClientRect();
+            
+            // Check if button is outside visible area and reposition
+            if (btnRect.right > viewportWidth - padding || btnRect.left < padding) {
+                noBtn.style.left = Math.max(padding, Math.min(viewportWidth - noBtn.offsetWidth - padding, parseFloat(noBtn.style.left) || 0)) + 'px';
             }
-            if (btnRect.bottom > window.innerHeight - padding) {
-                noBtn.style.top = (window.innerHeight - noBtn.offsetHeight - padding) + 'px';
+            if (btnRect.bottom > viewportHeight - padding || btnRect.top < padding) {
+                noBtn.style.top = Math.max(padding, Math.min(viewportHeight - noBtn.offsetHeight - padding, parseFloat(noBtn.style.top) || 0)) + 'px';
             }
-        });
+        }
+        
+        window.addEventListener('resize', keepButtonVisible);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', keepButtonVisible);
+        }
 
         // Initialize
         createFloatingHearts();
 
-        // Position No button initially relative to the container
+        // Position No button initially below the Yes button
         setTimeout(() => {
-            const containerRect = buttonsContainer.getBoundingClientRect();
-            noBtn.style.left = (containerRect.left + (containerRect.width - noBtn.offsetWidth) / 2) + 'px';
-            noBtn.style.top = (containerRect.bottom - noBtn.offsetHeight - 10) + 'px';
+            const vv = window.visualViewport;
+            const viewportWidth = vv ? vv.width : window.innerWidth;
+            const viewportHeight = vv ? vv.height : window.innerHeight;
+            
+            // Center horizontally, position near bottom third of screen
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+            
+            noBtn.style.left = ((viewportWidth - btnWidth) / 2) + 'px';
+            noBtn.style.top = (viewportHeight * 0.7) + 'px';
         }, 100);
     </script>
 </body>
