@@ -506,13 +506,15 @@
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
             
-            // Use visualViewport if available for more accurate dimensions
-            const viewportWidth = window.visualViewport ? window.visualViewport.width : document.documentElement.clientWidth;
-            const viewportHeight = window.visualViewport ? window.visualViewport.height : document.documentElement.clientHeight;
+            // Get the actual visible viewport dimensions
+            const viewportWidth = document.documentElement.clientWidth;
+            const viewportHeight = window.innerHeight;
             
-            // Ensure button stays fully within viewport
-            const maxX = viewportWidth - btnWidth - padding;
-            const maxY = viewportHeight - btnHeight - padding;
+            // Calculate safe max positions
+            const maxX = Math.floor(viewportWidth - btnWidth - padding);
+            const maxY = Math.floor(viewportHeight - btnHeight - padding);
+            const minX = padding;
+            const minY = padding;
 
             // Get current No button position
             const currentRect = noBtn.getBoundingClientRect();
@@ -524,10 +526,10 @@
             let attempts = 0;
             const maxAttempts = 100;
 
-            // Ensure we move at least 150px from current position
+            // Calculate new position ensuring it stays within bounds
             do {
-                newX = padding + Math.random() * Math.max(0, maxX - padding);
-                newY = padding + Math.random() * Math.max(0, maxY - padding);
+                newX = minX + Math.floor(Math.random() * (maxX - minX));
+                newY = minY + Math.floor(Math.random() * (maxY - minY));
                 attempts++;
                 
                 const distanceFromCurrent = Math.sqrt(
@@ -543,12 +545,12 @@
                     newY + btnHeight > yesBtnRect.top - 80
                 );
                 
-                if (!tooCloseToYes && distanceFromCurrent > 150) break;
+                if (!tooCloseToYes && distanceFromCurrent > 100) break;
             } while (attempts < maxAttempts);
 
-            // Final bounds check using reliable values
-            newX = Math.max(padding, Math.min(newX, maxX));
-            newY = Math.max(padding, Math.min(newY, maxY));
+            // Hard clamp to ensure within bounds
+            newX = Math.min(Math.max(newX, minX), maxX);
+            newY = Math.min(Math.max(newY, minY), maxY);
 
             noBtn.style.left = newX + 'px';
             noBtn.style.top = newY + 'px';
