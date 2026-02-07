@@ -506,9 +506,13 @@
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
             
+            // Use documentElement for accurate viewport size
+            const viewportWidth = Math.min(window.innerWidth, document.documentElement.clientWidth);
+            const viewportHeight = Math.min(window.innerHeight, document.documentElement.clientHeight);
+            
             // Ensure button stays fully within viewport
-            const maxX = Math.max(padding, window.innerWidth - btnWidth - padding);
-            const maxY = Math.max(padding, window.innerHeight - btnHeight - padding);
+            const maxX = viewportWidth - btnWidth - padding;
+            const maxY = viewportHeight - btnHeight - padding;
 
             // Get current No button position
             const currentRect = noBtn.getBoundingClientRect();
@@ -522,8 +526,8 @@
 
             // Ensure we move at least 150px from current position
             do {
-                newX = padding + Math.random() * (maxX - padding);
-                newY = padding + Math.random() * (maxY - padding);
+                newX = padding + Math.random() * Math.max(0, maxX - padding);
+                newY = padding + Math.random() * Math.max(0, maxY - padding);
                 attempts++;
                 
                 const distanceFromCurrent = Math.sqrt(
@@ -542,9 +546,9 @@
                 if (!tooCloseToYes && distanceFromCurrent > 150) break;
             } while (attempts < maxAttempts);
 
-            // Double-check bounds before setting
-            newX = Math.max(padding, Math.min(newX, window.innerWidth - btnWidth - padding));
-            newY = Math.max(padding, Math.min(newY, window.innerHeight - btnHeight - padding));
+            // Final bounds check
+            newX = Math.max(padding, Math.min(newX, maxX));
+            newY = Math.max(padding, Math.min(newY, maxY));
 
             noBtn.style.left = newX + 'px';
             noBtn.style.top = newY + 'px';
